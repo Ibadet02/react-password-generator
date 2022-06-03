@@ -12,4 +12,7 @@ export const StyledLink = styled(Link)`
     &:hover{
         color: red;
     }
+    @media(max-width: 417px){
+        padding: 1rem 0rem 1rem 0;
+    }
 `
