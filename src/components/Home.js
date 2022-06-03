@@ -1,8 +1,10 @@
-import React, {useReducer} from "react"
+import React, {useEffect, useReducer, useRef, useState} from "react"
 import { StyledHome } from "./styles/Home.styled"
 import { Container } from "./styles/Container"
 import { StyledBox } from "./styles/Boxes.styled"
-import { StyledResult } from "./styles/Result.styled"
+import { StyledResult, StyledNumberOfCharacters, StyledFinalResult, StyledFontAwesomeIcon } from "./styles/Result.styled"
+import { faCopy, faShuffle } from "@fortawesome/free-solid-svg-icons"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 const ACTIONS = ['Small letters', 'Capital letters', 'Numbers', 'Special characters']
 const LETTERS = 'abcdefghijklmnopqrstuvwxyz'
 const NUMBERS ='0123456789'
@@ -22,6 +24,11 @@ const reducer = (state, {type, payload}) =>{
                 ...state,
                 [ACTIONS[payload[0]].split(' ').join('').toLowerCase()]: {isChecked: state[Object.keys(state)[payload[0]]].isChecked, length: payload[1].target.value}
             }
+        case 'copy':
+            // console.log(payload.current)
+            return{
+                ...state
+            }
     }
 }
 export const Home = () =>{
@@ -32,6 +39,14 @@ export const Home = () =>{
         [ACTIONS[2].split(' ').join('').toLowerCase()]: {isChecked: true, length: 2},
         [ACTIONS[3].split(' ').join('').toLowerCase()]: {isChecked: false, length: 1}
     })
+    const shuffleRef = useRef(null)
+    const [shuffle, setShuffle] = useState('')
+    const handleCopy = ()=>{
+        navigator.clipboard.writeText(shuffleRef.current.innerText)
+    }
+    const handleShuffle = ()=>{
+        shuffleRef.current.textContent = shuffleRef.current.textContent.split('').sort(function(){return 0.5-Math.random()}).join('')
+    }
     return (
         <StyledHome>
             <Container flex_dr = 'column'>
@@ -55,7 +70,8 @@ export const Home = () =>{
                     )
                 })}
                 <StyledResult>
-                    <span>
+                    <StyledNumberOfCharacters>
+                    <span>Number of characters: </span>
                         { 
                             Object.values(state).map(el =>{
                                 if(el.isChecked)
@@ -64,47 +80,53 @@ export const Home = () =>{
                                     return 0
                             }).reduce((cur, acc)=>Number(cur)+Number(acc), 0)
                         }
-                    </span>
-                    <span>
-                        {
-                            Object.keys(state).map((el, index)=>{
-                                switch(el){
-                                    case 'smallletters':
-                                        if(state.smallletters.isChecked){
-                                            return new Array(Number(state.smallletters.length)).fill(null).map(el=>{
-                                                const index = Math.floor(Math.random()*(LETTERS.length))
-                                                {/* console.log('lowercase',index) */}
-                                                return LETTERS[index].toLowerCase()
-                                            }).join('')
+                    </StyledNumberOfCharacters>
+                    <StyledFinalResult>
+                        <span>
+                            <span ref={shuffleRef}>
+                                {   
+                                    Object.keys(state).map((el, index)=>{
+                                        switch(el){
+                                            case 'smallletters':
+                                                if(state.smallletters.isChecked){
+                                                    return new Array(Number(state.smallletters.length)).fill(null).map(el=>{
+                                                        const index = Math.floor(Math.random()*(LETTERS.length))
+                                                        return LETTERS[index].toLowerCase()
+                                                    }).join('')
+                                                }
+                                                break
+                                            case 'capitalletters':
+                                                if(state.capitalletters.isChecked){
+                                                    return new Array(Number(state.capitalletters.length)).fill(null).map(el=>{
+                                                        const index = Math.floor(Math.random()*(LETTERS.length))
+                                                        return LETTERS[index].toUpperCase()
+                                                    }).join('')
+                                                }
+                                                break
+                                            case 'numbers':
+                                                if(state.numbers.isChecked){
+                                                    return new Array(Number(state.numbers.length)).fill(null).map(el=>{
+                                                        const index = Math.floor(Math.random()*(NUMBERS.length))
+                                                        return NUMBERS[index]
+                                                    }).join('')
+                                                }
+                                                break
+                                            case 'specialcharacters':
+                                                if(state.specialcharacters.isChecked){
+                                                    return new Array(Number(state.specialcharacters.length)).fill(null).map(el=>{
+                                                        const index = Math.floor(Math.random()*(CHARACTERS.length))
+                                                        return CHARACTERS[index]
+                                                    }).join('')
+                                                }
+                                                break
                                         }
-                                    case 'capitalletters':
-                                        if(state.capitalletters.isChecked){
-                                            return new Array(Number(state.capitalletters.length)).fill(null).map(el=>{
-                                                const index = Math.floor(Math.random()*(LETTERS.length))
-                                                {/* console.log('uppercase',index) */}
-                                                return LETTERS[index].toUpperCase()
-                                            }).join('')
-                                        }
-                                    case 'numbers':
-                                        if(state.numbers.isChecked){
-                                            return new Array(Number(state.numbers.length)).fill(null).map(el=>{
-                                                const index = Math.floor(Math.random()*(NUMBERS.length))
-                                                {/* console.log('numbers',index) */}
-                                                return NUMBERS[index]
-                                            }).join('')
-                                        }
-                                    case 'specialcharacters':
-                                        if(state.specialcharacters.isChecked){
-                                            return new Array(Number(state.specialcharacters.length)).fill(null).map(el=>{
-                                                const index = Math.floor(Math.random()*(CHARACTERS.length))
-                                                {/* console.log('CHARACTERS',index) */}
-                                                return CHARACTERS[index]
-                                            }).join('')
-                                        }
+                                    }).join('')
                                 }
-                            }).join('')
-                        }
-                    </span>
+                            </span>
+                            <StyledFontAwesomeIcon onClick={()=>handleCopy()} icon={faCopy} />
+                        </span>
+                        {<button onClick={()=>handleShuffle()}><FontAwesomeIcon icon={faShuffle} /></button>}
+                    </StyledFinalResult>
                 </StyledResult>
             </Container>
         </StyledHome>
